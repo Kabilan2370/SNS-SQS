@@ -1,9 +1,7 @@
 # Create a s3 bucker
 resource "aws_s3_bucket" "s3" {
   bucket          = "sns-sqs-velautham"
-  versioning_configuration {
-    status = "Enabled"
-  }
+  
 
   tags = {
     Name          = "My bucket"
@@ -134,6 +132,6 @@ resource "aws_cloudwatch_metric_alarm" "alarm_s3_bucket" {
   alarm_actions       = [aws_sns_topic.sns_topic.arn]
   ok_actions          = [aws_sns_topic.sns_topic.arn]
   dimensions = {
-    S3                = aws_s3_bucket.s3_bucket
+    TopicName = "sns_topic"
   }
 }
