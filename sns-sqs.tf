@@ -113,7 +113,7 @@ resource "aws_sns_topic_subscription" "sqs_target" {
 resource "aws_sns_topic_subscription" "sqs_target_email" {
   topic_arn = aws_sns_topic.sns_topic.arn
   protocol  = "email"
-  endpoint  = "Kabilan848964@gmail.com"
+  endpoint  = "any-gmail-id"
 }
 
 # Cloud watch 
