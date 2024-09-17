@@ -1,10 +1,24 @@
 # Create a s3 bucker
 resource "aws_s3_bucket" "s3" {
-  bucket       = "sns-sqs-velautham"
+  bucket          = "sns-sqs-velautham"
+  versioning_configuration {
+    status = "Enabled"
+  }
 
   tags = {
-    Name         = "My bucket"
-    Environment  = "Dev"
+    Name          = "My bucket"
+    Environment   = "Dev"
+  }
+}
+
+# S3 bucket notification
+resource "aws_s3_bucket_notification" "notification" {
+  bucket = aws_s3_bucket.s3.id
+
+  topic {
+    topic_arn     = aws_sns_topic.sns_topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_suffix = ".log"
   }
 }
 
@@ -96,4 +110,30 @@ resource "aws_sns_topic_subscription" "sqs_target" {
   topic_arn = aws_sns_topic.sns_topic.arn
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.s_queue.arn
+}
+
+resource "aws_sns_topic_subscription" "sqs_target_email" {
+  topic_arn = aws_sns_topic.sns_topic.arn
+  protocol  = "email"
+  endpoint  = "Kabilan848964@gmail.com"
+}
+
+# Cloud watch 
+
+resource "aws_cloudwatch_metric_alarm" "alarm_s3_bucket" {
+  alarm_name          = "s3_bucket"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "HealthyHostCount"
+  namespace           = "AWS/S3"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 0
+  alarm_description   = "Number of healthy nodes in Target Group"
+  actions_enabled     = "true"
+  alarm_actions       = [aws_sns_topic.sns_topic.arn]
+  ok_actions          = [aws_sns_topic.sns_topic.arn]
+  dimensions = {
+    S3                = aws_s3_bucket.s3_bucket
+  }
 }
